@@ -3,7 +3,7 @@
     "name": "viir/simplegamedev",
     "summary": "Making it simple to develop a video game",
     "license": "MIT",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "exposed-modules": [
         "Simplegamedev20190510"
     ],
