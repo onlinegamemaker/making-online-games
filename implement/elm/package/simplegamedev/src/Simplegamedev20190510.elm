@@ -1,8 +1,10 @@
-module Simplegamedev20190509 exposing
-    ( SimpleGameWithKeyboardInputAndFixedUpdateInterval
+module Simplegamedev20190510 exposing
+    ( KeyboardEvent
+    , SimpleGame
+    , SimpleGameConfiguration
     , listDictGet
     , listRemoveSet
-    , simpleGameWithKeyboardInputAndFixedUpdateInterval
+    , simpleGame
     , svgRectFrom_Fill_Left_Top_Width_Height
     )
 
@@ -23,7 +25,7 @@ import Time
 -}
 
 
-type alias SimpleGameWithKeyboardInputAndFixedUpdateInterval appState eventFromHtml =
+type alias SimpleGameConfiguration appState eventFromHtml =
     { updateIntervalInMilliseconds : Int
     , updatePerInterval : appState -> appState
     , updateOnKeyDown : Keyboard.Event.KeyboardEvent -> appState -> appState
@@ -41,10 +43,18 @@ type SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml
     | EventFromHtml eventFromHtml
 
 
-simpleGameWithKeyboardInputAndFixedUpdateInterval :
-    SimpleGameWithKeyboardInputAndFixedUpdateInterval appState eventFromHtml
+type alias SimpleGame appState eventFromHtml =
+    Program () appState (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
+
+
+type alias KeyboardEvent =
+    Keyboard.Event.KeyboardEvent
+
+
+simpleGame :
+    SimpleGameConfiguration appState eventFromHtml
     -> Program () appState (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
-simpleGameWithKeyboardInputAndFixedUpdateInterval appConfig =
+simpleGame appConfig =
     Browser.element
         { init = always ( appConfig.initialState, Cmd.none )
         , view = appConfig.renderToHtml >> Html.map EventFromHtml
@@ -54,7 +64,7 @@ simpleGameWithKeyboardInputAndFixedUpdateInterval appConfig =
 
 
 simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate :
-    SimpleGameWithKeyboardInputAndFixedUpdateInterval appState eventFromHtml
+    SimpleGameConfiguration appState eventFromHtml
     -> SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml
     -> appState
     -> appState
@@ -74,7 +84,7 @@ simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate appConfig event appState
 
 
 simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions :
-    SimpleGameWithKeyboardInputAndFixedUpdateInterval appState eventFromHtml
+    SimpleGameConfiguration appState eventFromHtml
     -> appState
     -> Sub (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
 simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions appConfig appState =

@@ -1,11 +1,11 @@
 {
     "type": "package",
     "name": "viir/simplegamedev",
-    "summary": "Helper functions for video game development",
+    "summary": "Making it simple to develop a video game",
     "license": "MIT",
     "version": "0.1.0",
     "exposed-modules": [
-        "Simplegamedev20190509"
+        "Simplegamedev20190510"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
