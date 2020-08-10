@@ -1,5 +1,3 @@
-# Online Game Maker
+# Making Online Games Is Easy
 
-## Developing video games has never been easier
-
-This repository contains guides and tools to help you develop video games the simple way.
+Tutorials, guides and tools for those making online multiplayer games.
