@@ -3,7 +3,15 @@ module Main exposing (main)
 import Html
 import Html.Attributes
 import Keyboard.Key
-import Simplegamedev20190510 exposing (..)
+import Simplegamedev20190510
+    exposing
+        ( KeyboardEvent
+        , SimpleGame
+        , composeSimpleGame
+        , listDictGet
+        , listRemoveSet
+        , svgRectFrom_Fill_Left_Top_Width_Height
+        )
 import Svg
 import Svg.Attributes
 
