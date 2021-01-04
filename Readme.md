@@ -1,3 +1,3 @@
-# Making Online Games Is Easy
+# Making Online Games
 
-Tutorials, guides and tools for those making online multiplayer games.
+Tutorials, guides and examples on making online games.
