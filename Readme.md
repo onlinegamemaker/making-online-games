@@ -20,5 +20,11 @@ A simple implementation of the classic snake game. You can control the snake usi
 
 Playing an audio file from the Elm update function without using ports:
 
-+ [.implement/demo/play-audio-file](./implement/demo/play-audio-file)
++ [./implement/demo/play-audio-file](./implement/demo/play-audio-file)
 + https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fmain%2Fimplement%2Fdemo%2Fplay-audio-file&file-path-to-open=src%2FMain.elm
+
+### WebGL Rotating Cube
+
+This demo uses WebGL functions to render a rotating cube:
+
++ [./implement/demo/webgl-rotating-cube](./implement/demo/webgl-rotating-cube)
