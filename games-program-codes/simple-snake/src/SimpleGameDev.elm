@@ -1,9 +1,11 @@
-module Simplegamedev20190510 exposing
-    ( composeSimpleGame, SimpleGame, SimpleGameComposition, KeyboardEvent
-    , listRemoveSet, listDictGet, svgRectFrom_Fill_Left_Top_Width_Height
+module SimpleGameDev exposing
+    ( composeSimpleGame, SimpleGame, SimpleGameComposition
+    , svgRectangle, listRemoveSet, listDictGet
+    , KeyboardEventStructure
     )
 
-{-| This library helps you get implement your video game as simple as possible.
+{-| This module provides a framework to build video games as well as a library of standard helper functions.
+The framework wraps the more general Elm program type with an interface optimized for video games.
 
 
 # Composing the App
@@ -15,7 +17,7 @@ module Simplegamedev20190510 exposing
 
 Following are generic helper functions which are not specific to one particular game.
 
-@docs listRemoveSet, listDictGet, svgRectFrom_Fill_Left_Top_Width_Height
+@docs svgRectangle, listRemoveSet, listDictGet
 
 -}
 
@@ -58,7 +60,7 @@ composeSimpleGame :
 composeSimpleGame appConfig =
     Browser.element
         { init = always ( appConfig.initialState, Cmd.none )
-        , view = appConfig.renderToHtml >> Html.map EventFromHtml
+        , view = appConfig.renderToHtml >> Html.map FromHtmlEvent
         , update = \event model -> ( simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate appConfig event model, Cmd.none )
         , subscriptions = simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions appConfig
         }
@@ -95,35 +97,35 @@ simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate :
     -> appState
 simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate appConfig event appStateBefore =
     case event of
-        KeyDown keyboardEvent ->
-            appConfig.updateOnKeyDown keyboardEvent appStateBefore
+        KeyDownEvent keyDown ->
+            appConfig.updateOnKeyDown keyDown appStateBefore
 
-        KeyUp keyboardEvent ->
-            appConfig.updateOnKeyUp keyboardEvent appStateBefore
+        KeyUpEvent keyUp ->
+            appConfig.updateOnKeyUp keyUp appStateBefore
 
-        ArriveAtTime time ->
+        TimeArrivedEvent _ ->
             appStateBefore |> appConfig.updatePerInterval
 
-        EventFromHtml eventFromHtml ->
-            appStateBefore |> appConfig.updateForEventFromHtml eventFromHtml
+        FromHtmlEvent fromHtmlEvent ->
+            appStateBefore |> appConfig.updateForEventFromHtml fromHtmlEvent
 
 
 simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions :
     SimpleGameComposition appState eventFromHtml
     -> appState
     -> Sub (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
-simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions appConfig appState =
-    [ Browser.Events.onKeyDown (Keyboard.Event.decodeKeyboardEvent |> Json.Decode.map KeyDown)
-    , Time.every (appConfig.updateIntervalInMilliseconds |> toFloat) ArriveAtTime
+simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions appConfig _ =
+    [ Browser.Events.onKeyDown (Keyboard.Event.decodeKeyboardEvent |> Json.Decode.map KeyDownEvent)
+    , Time.every (appConfig.updateIntervalInMilliseconds |> toFloat) TimeArrivedEvent
     ]
         |> Sub.batch
 
 
 type SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml
-    = ArriveAtTime Time.Posix
-    | KeyDown Keyboard.Event.KeyboardEvent
-    | KeyUp Keyboard.Event.KeyboardEvent
-    | EventFromHtml eventFromHtml
+    = TimeArrivedEvent Time.Posix
+    | KeyDownEvent KeyboardEventStructure
+    | KeyUpEvent KeyboardEventStructure
+    | FromHtmlEvent eventFromHtml
 
 
 {-| This type describes the keyboard events as used in the functions `updateOnKeyDown` and `updateOnKeyUp`.
@@ -134,8 +136,26 @@ Use as follows:
     ...
 
 -}
-type alias KeyboardEvent =
+type alias KeyboardEventStructure =
     Keyboard.Event.KeyboardEvent
+
+
+{-| Generate the HTML code for an SVG rectangle. Note the rectangle will only be visible when placed in an SVG element.
+Following is an example of how to use it:
+
+    svgRectangle { fill = "red" } { left = 10, top = 10, width = 7, height = 4 }
+
+-}
+svgRectangle : { fill : String } -> { left : Int, top : Int, width : Int, height : Int } -> Svg.Svg a
+svgRectangle { fill } { left, top, width, height } =
+    Svg.rect
+        [ Svg.Attributes.fill fill
+        , Svg.Attributes.x (left |> String.fromInt)
+        , Svg.Attributes.y (top |> String.fromInt)
+        , Svg.Attributes.width (width |> String.fromInt)
+        , Svg.Attributes.height (height |> String.fromInt)
+        ]
+        []
 
 
 {-| Remove a set of values from a list
@@ -158,21 +178,3 @@ listDictGet key =
                 Nothing
         )
         >> List.head
-
-
-{-| Generate the HTML code for a SVG rectangle. This only works when placed in an SVG element.
-The follow example shows how to create a red rectangle with the upper left corner at coordinates 10|10, a width of 7 and a height of 4 :
-
-    svgRectFrom_Fill_Left_Top_Width_Height "red" ( 10, 10 ) ( 7, 4 )
-
--}
-svgRectFrom_Fill_Left_Top_Width_Height : String -> ( Int, Int ) -> ( Int, Int ) -> Svg.Svg a
-svgRectFrom_Fill_Left_Top_Width_Height fill ( left, top ) ( width, height ) =
-    Svg.rect
-        [ Svg.Attributes.fill fill
-        , Svg.Attributes.x (left |> String.fromInt)
-        , Svg.Attributes.y (top |> String.fromInt)
-        , Svg.Attributes.width (width |> String.fromInt)
-        , Svg.Attributes.height (height |> String.fromInt)
-        ]
-        []

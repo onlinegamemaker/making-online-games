@@ -3,15 +3,7 @@ module Main exposing (main)
 import Html
 import Html.Attributes
 import Keyboard.Key
-import Simplegamedev20190510
-    exposing
-        ( KeyboardEvent
-        , SimpleGame
-        , composeSimpleGame
-        , listDictGet
-        , listRemoveSet
-        , svgRectFrom_Fill_Left_Top_Width_Height
-        )
+import SimpleGameDev exposing (listDictGet, listRemoveSet)
 import Svg
 import Svg.Attributes
 
@@ -52,9 +44,9 @@ type alias Snake =
     }
 
 
-main : SimpleGame GameState ()
+main : SimpleGameDev.SimpleGame GameState ()
 main =
-    composeSimpleGame
+    SimpleGameDev.composeSimpleGame
         { updateIntervalInMilliseconds = 125
         , updatePerInterval = moveSnakeForwardOneStep
         , updateOnKeyDown = onKeyDown
@@ -85,7 +77,7 @@ snakeDirectionFromKeyboardKey =
     ]
 
 
-onKeyDown : KeyboardEvent -> GameState -> GameState
+onKeyDown : SimpleGameDev.KeyboardEventStructure -> GameState -> GameState
 onKeyDown keyboardEvent gameStateBefore =
     case snakeDirectionFromKeyboardKey |> listDictGet keyboardEvent.keyCode of
         Nothing ->
@@ -187,24 +179,23 @@ renderToHtml gameState =
         cellSideLength =
             30
 
-        svgRectAtCellLocation fill cellLocation =
-            svgRectFrom_Fill_Left_Top_Width_Height
-                fill
-                ( cellLocation.x * cellSideLength + 1
-                , cellLocation.y * cellSideLength + 1
-                )
-                ( cellSideLength - 2
-                , cellSideLength - 2
-                )
+        svgRectangleAtCellLocation fill cellLocation =
+            SimpleGameDev.svgRectangle
+                { fill = fill }
+                { left = cellLocation.x * cellSideLength + 1
+                , top = cellLocation.y * cellSideLength + 1
+                , width = cellSideLength - 2
+                , height = cellSideLength - 2
+                }
 
         snakeView =
             gameState.snake.headLocation
                 :: gameState.snake.tailSegments
-                |> List.map (svgRectAtCellLocation "whitesmoke")
+                |> List.map (svgRectangleAtCellLocation "whitesmoke")
                 |> Svg.g []
 
         appleView =
-            svgRectAtCellLocation "red" gameState.appleLocation
+            svgRectangleAtCellLocation "red" gameState.appleLocation
     in
     Svg.svg
         [ Svg.Attributes.width (worldSizeX * cellSideLength |> String.fromInt)
