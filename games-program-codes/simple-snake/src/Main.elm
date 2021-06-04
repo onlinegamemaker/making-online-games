@@ -44,16 +44,22 @@ type alias Snake =
     }
 
 
-main : SimpleGameDev.SimpleGame GameState ()
+main : SimpleGameDev.GameProgram GameState ()
 main =
-    SimpleGameDev.composeSimpleGame
-        { updateIntervalInMilliseconds = 125
-        , updatePerInterval = moveSnakeForwardOneStep
-        , updateOnKeyDown = onKeyDown
-        , updateOnKeyUp = always identity
-        , renderToHtml = renderToHtml
-        , initialState = initialState
-        , updateForEventFromHtml = always identity
+    SimpleGameDev.game
+        { initialState = initialState
+        , view =
+            SimpleGameDev.htmlViewWithoutInputs
+                { renderToHtml = renderToHtml }
+        , updateBasedOnTime =
+            Just
+                (SimpleGameDev.updateWithFixedInterval
+                    { intervalInMilliseconds = 125
+                    , update = moveSnakeForwardOneStep
+                    }
+                )
+        , updateOnKeyDown = Just onKeyDown
+        , updateOnKeyUp = Nothing
         }
 
 

@@ -1,16 +1,16 @@
 module SimpleGameDev exposing
-    ( composeSimpleGame, SimpleGame, SimpleGameComposition
+    ( game, GameProgram, GameComposition
     , svgRectangle, listRemoveSet, listDictGet
-    , KeyboardEventStructure
+    , GameView, KeyboardEventStructure, htmlViewWithInputs, htmlViewWithoutInputs, updateWithFixedInterval
     )
 
 {-| This module provides a framework to build video games as well as a library of standard helper functions.
 The framework wraps the more general Elm program type with an interface optimized for video games.
 
 
-# Composing the App
+# Composing the Game
 
-@docs composeSimpleGame, SimpleGame, SimpleGameComposition, KeyboardEvent
+@docs game, GameProgram, GameComposition, KeyboardEvent
 
 
 # Common Helpers
@@ -38,94 +38,42 @@ import Time
 -}
 
 
-{-| Use this function to describe how your game is composed of the specific functions in your project.
-Following is an example:
-
-    game : SimpleGame GameState ()
-    game =
-        composeSimpleGame
-            { updateIntervalInMilliseconds = 125
-            , updatePerInterval = updatePerInterval
-            , updateOnKeyDown = updateOnKeyDown
-            , updateOnKeyUp = updateOnKeyUp
-            , renderToHtml = renderToHtml
-            , initialState = initialGameState
-            , updateForEventFromHtml = updateForEventFromHtml
-            }
-
+{-| Describes how your game program is composed of functions that describe how to handle the different kinds of events like for example, pressing or releasing key.
 -}
-composeSimpleGame :
-    SimpleGameComposition appState eventFromHtml
-    -> Program () appState (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
-composeSimpleGame appConfig =
-    Browser.element
-        { init = always ( appConfig.initialState, Cmd.none )
-        , view = appConfig.renderToHtml >> Html.map FromHtmlEvent
-        , update = \event model -> ( simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate appConfig event model, Cmd.none )
-        , subscriptions = simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions appConfig
-        }
-
-
-{-| Describes how your game app is composed of functions that describe how to handle the different kinds of events like for example, pressing or releasing key.
--}
-type alias SimpleGameComposition appState eventFromHtml =
-    { updateIntervalInMilliseconds : Int
-    , updatePerInterval : appState -> appState
-    , updateOnKeyDown : Keyboard.Event.KeyboardEvent -> appState -> appState
-    , updateOnKeyUp : Keyboard.Event.KeyboardEvent -> appState -> appState
-    , renderToHtml : appState -> Html.Html eventFromHtml
-    , updateForEventFromHtml : eventFromHtml -> appState -> appState
-    , initialState : appState
+type alias GameComposition state eventFromView =
+    { initialState : state
+    , view : GameView state eventFromView
+    , updateOnKeyDown : Maybe (Keyboard.Event.KeyboardEvent -> state -> state)
+    , updateOnKeyUp : Maybe (Keyboard.Event.KeyboardEvent -> state -> state)
+    , updateBasedOnTime : Maybe (UpdateBasedOnTime state)
     }
 
 
 {-| This type helps you write a type annotation for the function describing the composition of your game:
 
-    game : SimpleGame GameState ()
-    game =
+    main : GameProgram GameState ()
+    main =
     ....
 
 -}
-type alias SimpleGame appState eventFromHtml =
-    Program () appState (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
+type alias GameProgram state eventFromView =
+    Program () state (GameEventStructure eventFromView)
 
 
-simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate :
-    SimpleGameComposition appState eventFromHtml
-    -> SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml
-    -> appState
-    -> appState
-simpleGameWithKeyboardInputAndFixedUpdateIntervalUpdate appConfig event appStateBefore =
-    case event of
-        KeyDownEvent keyDown ->
-            appConfig.updateOnKeyDown keyDown appStateBefore
-
-        KeyUpEvent keyUp ->
-            appConfig.updateOnKeyUp keyUp appStateBefore
-
-        TimeArrivedEvent _ ->
-            appStateBefore |> appConfig.updatePerInterval
-
-        FromHtmlEvent fromHtmlEvent ->
-            appStateBefore |> appConfig.updateForEventFromHtml fromHtmlEvent
+type GameView state event
+    = HtmlViewWithoutInputs (state -> Html.Html event)
+    | HtmlViewWithInputs (state -> Html.Html event) (event -> state -> state)
 
 
-simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions :
-    SimpleGameComposition appState eventFromHtml
-    -> appState
-    -> Sub (SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml)
-simpleGameWithKeyboardInputAndFixedUpdateIntervalSubscriptions appConfig _ =
-    [ Browser.Events.onKeyDown (Keyboard.Event.decodeKeyboardEvent |> Json.Decode.map KeyDownEvent)
-    , Time.every (appConfig.updateIntervalInMilliseconds |> toFloat) TimeArrivedEvent
-    ]
-        |> Sub.batch
+type UpdateBasedOnTime state
+    = FixedInterval { intervalInMilliseconds : Int, update : state -> state }
 
 
-type SimpleGameWithKeyboardInputAndFixedUpdateIntervalEvent eventFromHtml
+type GameEventStructure eventFromView
     = TimeArrivedEvent Time.Posix
     | KeyDownEvent KeyboardEventStructure
     | KeyUpEvent KeyboardEventStructure
-    | FromHtmlEvent eventFromHtml
+    | FromHtmlEvent eventFromView
 
 
 {-| This type describes the keyboard events as used in the functions `updateOnKeyDown` and `updateOnKeyUp`.
@@ -138,6 +86,109 @@ Use as follows:
 -}
 type alias KeyboardEventStructure =
     Keyboard.Event.KeyboardEvent
+
+
+htmlViewWithoutInputs : { renderToHtml : state -> Html.Html event } -> GameView state event
+htmlViewWithoutInputs { renderToHtml } =
+    HtmlViewWithoutInputs renderToHtml
+
+
+htmlViewWithInputs :
+    { renderToHtml : state -> Html.Html event, updateForInput : event -> state -> state }
+    -> GameView state event
+htmlViewWithInputs { renderToHtml, updateForInput } =
+    HtmlViewWithInputs renderToHtml updateForInput
+
+
+updateWithFixedInterval : { intervalInMilliseconds : Int, update : state -> state } -> UpdateBasedOnTime state
+updateWithFixedInterval =
+    FixedInterval
+
+
+{-| Use this function to compose a complete game, connecting the specific functions in your project.
+Following is an example:
+
+    main : SimpleGameDev.GameProgram GameState ()
+    main =
+        SimpleGameDev.game
+            { initialState = initialState
+            , view =
+                SimpleGameDev.htmlViewWithoutInputs
+                    { renderToHtml = renderToHtml }
+            , updateBasedOnTime =
+                Just
+                    (SimpleGameDev.updateWithFixedInterval
+                        { intervalInMilliseconds = 125
+                        , update = moveSnakeForwardOneStep
+                        }
+                    )
+            , updateOnKeyDown = Just onKeyDown
+            , updateOnKeyUp = Nothing
+            }
+
+-}
+game :
+    GameComposition state eventFromHtml
+    -> Program () state (GameEventStructure eventFromHtml)
+game gameConfig =
+    let
+        ( view, updateForEventFromHtml ) =
+            case gameConfig.view of
+                HtmlViewWithoutInputs renderToHtml ->
+                    ( renderToHtml >> Html.map FromHtmlEvent, Nothing )
+
+                HtmlViewWithInputs renderToHtml updateForInput ->
+                    ( renderToHtml >> Html.map FromHtmlEvent, Just updateForInput )
+
+        update :
+            GameEventStructure eventFromHtml
+            -> state
+            -> state
+        update event stateBefore =
+            case event of
+                KeyDownEvent keyDown ->
+                    (gameConfig.updateOnKeyDown |> Maybe.withDefault (always identity)) keyDown stateBefore
+
+                KeyUpEvent keyUp ->
+                    (gameConfig.updateOnKeyUp |> Maybe.withDefault (always identity)) keyUp stateBefore
+
+                TimeArrivedEvent _ ->
+                    (gameConfig.updateBasedOnTime
+                        |> Maybe.map
+                            (\updateBasedOnTime ->
+                                case updateBasedOnTime of
+                                    FixedInterval fixedInterval ->
+                                        fixedInterval.update
+                            )
+                        |> Maybe.withDefault identity
+                    )
+                        stateBefore
+
+                FromHtmlEvent fromHtmlEvent ->
+                    (updateForEventFromHtml |> Maybe.withDefault (always identity)) fromHtmlEvent stateBefore
+
+        subscriptions _ =
+            let
+                updateBasedOnTimeSub =
+                    case gameConfig.updateBasedOnTime of
+                        Nothing ->
+                            Nothing
+
+                        Just (FixedInterval fixedInterval) ->
+                            Just (Time.every (toFloat fixedInterval.intervalInMilliseconds) TimeArrivedEvent)
+            in
+            [ Just (Browser.Events.onKeyDown (Keyboard.Event.decodeKeyboardEvent |> Json.Decode.map KeyDownEvent))
+            , updateBasedOnTimeSub
+            ]
+                |> List.filterMap identity
+                |> Sub.batch
+    in
+    Browser.element
+        { init = always ( gameConfig.initialState, Cmd.none )
+        , view = view
+        , update = \event state -> ( update event state, Cmd.none )
+        , subscriptions = subscriptions
+        }
 
 
 {-| Generate the HTML code for an SVG rectangle. Note the rectangle will only be visible when placed in an SVG element.
