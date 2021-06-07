@@ -1,21 +1,13 @@
 module Main exposing (main)
 
-import Html
-import Html.Attributes
 import Keyboard.Key
+import Playground
 import SimpleGameDev exposing (listDictGet, listRemoveSet)
-import Svg
-import Svg.Attributes
 
 
-worldSizeX : Int
-worldSizeX =
-    16
-
-
-worldSizeY : Int
-worldSizeY =
-    12
+worldSizeCells : { x : Int, y : Int }
+worldSizeCells =
+    { x = 16, y = 12 }
 
 
 type SnakeDirection
@@ -48,9 +40,7 @@ main : SimpleGameDev.GameProgram GameState ()
 main =
     SimpleGameDev.game
         { initialState = initialState
-        , view =
-            SimpleGameDev.htmlViewWithoutInputs
-                { renderToHtml = renderToHtml }
+        , view = SimpleGameDev.pictureView renderToPicture
         , updateBasedOnTime =
             Just
                 (SimpleGameDev.updateWithFixedInterval
@@ -131,8 +121,8 @@ moveSnakeForwardOneStep gameStateBefore =
             }
 
         headLocation =
-            { x = (headLocationBeforeWrapping.x + worldSizeX) |> modBy worldSizeX
-            , y = (headLocationBeforeWrapping.y + worldSizeY) |> modBy worldSizeY
+            { x = (headLocationBeforeWrapping.x + worldSizeCells.x) |> modBy worldSizeCells.x
+            , y = (headLocationBeforeWrapping.y + worldSizeCells.y) |> modBy worldSizeCells.y
             }
 
         snakeEats =
@@ -160,10 +150,10 @@ moveSnakeForwardOneStep gameStateBefore =
             else
                 let
                     cellsLocationsWithoutSnake =
-                        List.range 0 (worldSizeX - 1)
+                        List.range 0 (worldSizeCells.x - 1)
                             |> List.concatMap
                                 (\x ->
-                                    List.range 0 (worldSizeY - 1)
+                                    List.range 0 (worldSizeCells.y - 1)
                                         |> List.map (\y -> { x = x, y = y })
                                 )
                             |> listRemoveSet (headLocation :: tailSegments)
@@ -179,33 +169,36 @@ moveSnakeForwardOneStep gameStateBefore =
     }
 
 
-renderToHtml : GameState -> Html.Html ()
-renderToHtml gameState =
+renderToPicture : GameState -> SimpleGameDev.PictureViewResult
+renderToPicture gameState =
     let
         cellSideLength =
             30
 
-        svgRectangleAtCellLocation fill cellLocation =
-            SimpleGameDev.svgRectangle
-                { fill = fill }
-                { left = cellLocation.x * cellSideLength + 1
-                , top = cellLocation.y * cellSideLength + 1
-                , width = cellSideLength - 2
-                , height = cellSideLength - 2
-                }
+        worldWidth =
+            cellSideLength * toFloat worldSizeCells.x
 
-        snakeView =
+        worldHeight =
+            cellSideLength * toFloat worldSizeCells.y
+
+        rectangleAtCellLocation fill cellLocation =
+            Playground.rectangle fill (cellSideLength - 2) (cellSideLength - 2)
+                |> Playground.moveRight ((toFloat cellLocation.x + 0.5) * cellSideLength - worldWidth / 2)
+                |> Playground.moveDown ((toFloat cellLocation.y + 0.5) * cellSideLength - worldHeight / 2)
+
+        worldShape =
+            Playground.rectangle Playground.black worldWidth worldHeight
+
+        snakeShape =
             gameState.snake.headLocation
                 :: gameState.snake.tailSegments
-                |> List.map (svgRectangleAtCellLocation "whitesmoke")
-                |> Svg.g []
+                |> List.map (rectangleAtCellLocation Playground.lightGrey)
+                |> Playground.group
 
-        appleView =
-            svgRectangleAtCellLocation "red" gameState.appleLocation
+        appleShape =
+            rectangleAtCellLocation Playground.red gameState.appleLocation
     in
-    Svg.svg
-        [ Svg.Attributes.width (worldSizeX * cellSideLength |> String.fromInt)
-        , Svg.Attributes.height (worldSizeY * cellSideLength |> String.fromInt)
-        , Html.Attributes.style "background" "black"
-        ]
-        [ snakeView, appleView ]
+    { shapes = [ worldShape, snakeShape, appleShape ]
+    , viewport = { width = worldWidth, height = worldHeight }
+    , backgroundColor = Playground.darkCharcoal
+    }

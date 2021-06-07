@@ -1,8 +1,4 @@
-module SimpleGameDev exposing
-    ( game, GameProgram, GameComposition
-    , svgRectangle, listRemoveSet, listDictGet
-    , GameView, KeyboardEventStructure, htmlViewWithInputs, htmlViewWithoutInputs, updateWithFixedInterval
-    )
+module SimpleGameDev exposing (..)
 
 {-| This module provides a framework to build video games as well as a library of standard helper functions.
 The framework wraps the more general Elm program type with an interface optimized for video games.
@@ -22,12 +18,15 @@ Following are generic helper functions which are not specific to one particular 
 -}
 
 import Browser
+import Browser.Dom
 import Browser.Events
 import Html
 import Json.Decode
 import Keyboard.Event
+import Playground
 import Svg
 import Svg.Attributes
+import Task
 import Time
 
 
@@ -57,12 +56,31 @@ type alias GameComposition state eventFromView =
 
 -}
 type alias GameProgram state eventFromView =
-    Program () state (GameEventStructure eventFromView)
+    Program () (GameStateIncludingFramework state) (GameEventStructure eventFromView)
+
+
+type alias GameStateIncludingFramework state =
+    { specific : state
+    , framework : FrameworkState
+    }
+
+
+type alias FrameworkState =
+    { browserSize : { width : Int, height : Int }
+    }
 
 
 type GameView state event
     = HtmlViewWithoutInputs (state -> Html.Html event)
     | HtmlViewWithInputs (state -> Html.Html event) (event -> state -> state)
+    | PictureView (state -> PictureViewResult)
+
+
+type alias PictureViewResult =
+    { shapes : List Playground.Shape
+    , viewport : { width : Float, height : Float }
+    , backgroundColor : Playground.Color
+    }
 
 
 type UpdateBasedOnTime state
@@ -74,6 +92,8 @@ type GameEventStructure eventFromView
     | KeyDownEvent KeyboardEventStructure
     | KeyUpEvent KeyboardEventStructure
     | FromHtmlEvent eventFromView
+    | BrowserResizedEvent Int Int
+    | BrowserGotViewportEvent Browser.Dom.Viewport
 
 
 {-| This type describes the keyboard events as used in the functions `updateOnKeyDown` and `updateOnKeyUp`.
@@ -98,6 +118,11 @@ htmlViewWithInputs :
     -> GameView state event
 htmlViewWithInputs { renderToHtml, updateForInput } =
     HtmlViewWithInputs renderToHtml updateForInput
+
+
+pictureView : (state -> PictureViewResult) -> GameView state event
+pictureView =
+    PictureView
 
 
 updateWithFixedInterval : { intervalInMilliseconds : Int, update : state -> state } -> UpdateBasedOnTime state
@@ -129,43 +154,97 @@ Following is an example:
 -}
 game :
     GameComposition state eventFromHtml
-    -> Program () state (GameEventStructure eventFromHtml)
+    -> GameProgram state eventFromHtml
 game gameConfig =
     let
         ( view, updateForEventFromHtml ) =
             case gameConfig.view of
                 HtmlViewWithoutInputs renderToHtml ->
-                    ( renderToHtml >> Html.map FromHtmlEvent, Nothing )
+                    ( .specific >> renderToHtml >> Html.map FromHtmlEvent, Nothing )
 
                 HtmlViewWithInputs renderToHtml updateForInput ->
-                    ( renderToHtml >> Html.map FromHtmlEvent, Just updateForInput )
+                    ( .specific >> renderToHtml >> Html.map FromHtmlEvent, Just updateForInput )
+
+                PictureView specifcView ->
+                    ( \state ->
+                        let
+                            { shapes, viewport, backgroundColor } =
+                                specifcView state.specific
+
+                            shapesIncludingBackground =
+                                Playground.rectangle backgroundColor 99999 99999
+                                    :: shapes
+                        in
+                        Playground.render
+                            (Playground.toScreen viewport.width viewport.height)
+                            shapesIncludingBackground
+                    , Nothing
+                    )
+
+        wrapUpdateGameSpecificState :
+            (state -> state)
+            -> GameStateIncludingFramework state
+            -> GameStateIncludingFramework state
+        wrapUpdateGameSpecificState updateGameSpecificState { specific, framework } =
+            GameStateIncludingFramework (updateGameSpecificState specific) framework
 
         update :
             GameEventStructure eventFromHtml
-            -> state
-            -> state
+            -> GameStateIncludingFramework state
+            -> GameStateIncludingFramework state
         update event stateBefore =
             case event of
                 KeyDownEvent keyDown ->
-                    (gameConfig.updateOnKeyDown |> Maybe.withDefault (always identity)) keyDown stateBefore
+                    wrapUpdateGameSpecificState
+                        ((gameConfig.updateOnKeyDown |> Maybe.withDefault (always identity)) keyDown)
+                        stateBefore
 
                 KeyUpEvent keyUp ->
-                    (gameConfig.updateOnKeyUp |> Maybe.withDefault (always identity)) keyUp stateBefore
+                    wrapUpdateGameSpecificState
+                        ((gameConfig.updateOnKeyUp |> Maybe.withDefault (always identity)) keyUp)
+                        stateBefore
 
                 TimeArrivedEvent _ ->
-                    (gameConfig.updateBasedOnTime
-                        |> Maybe.map
-                            (\updateBasedOnTime ->
-                                case updateBasedOnTime of
-                                    FixedInterval fixedInterval ->
-                                        fixedInterval.update
-                            )
-                        |> Maybe.withDefault identity
-                    )
+                    wrapUpdateGameSpecificState
+                        (gameConfig.updateBasedOnTime
+                            |> Maybe.map
+                                (\updateBasedOnTime ->
+                                    case updateBasedOnTime of
+                                        FixedInterval fixedInterval ->
+                                            fixedInterval.update
+                                )
+                            |> Maybe.withDefault identity
+                        )
                         stateBefore
 
                 FromHtmlEvent fromHtmlEvent ->
-                    (updateForEventFromHtml |> Maybe.withDefault (always identity)) fromHtmlEvent stateBefore
+                    wrapUpdateGameSpecificState
+                        ((updateForEventFromHtml |> Maybe.withDefault (always identity)) fromHtmlEvent)
+                        stateBefore
+
+                BrowserResizedEvent width height ->
+                    let
+                        frameworkBefore =
+                            stateBefore.framework
+                    in
+                    { stateBefore
+                        | framework =
+                            { frameworkBefore
+                                | browserSize = { width = width, height = height }
+                            }
+                    }
+
+                BrowserGotViewportEvent { viewport } ->
+                    let
+                        frameworkBefore =
+                            stateBefore.framework
+                    in
+                    { stateBefore
+                        | framework =
+                            { frameworkBefore
+                                | browserSize = { width = floor viewport.width, height = floor viewport.height }
+                            }
+                    }
 
         subscriptions _ =
             let
@@ -179,12 +258,19 @@ game gameConfig =
             in
             [ Just (Browser.Events.onKeyDown (Keyboard.Event.decodeKeyboardEvent |> Json.Decode.map KeyDownEvent))
             , updateBasedOnTimeSub
+            , Just (Browser.Events.onResize BrowserResizedEvent)
             ]
                 |> List.filterMap identity
                 |> Sub.batch
     in
     Browser.element
-        { init = always ( gameConfig.initialState, Cmd.none )
+        { init =
+            always
+                ( { specific = gameConfig.initialState
+                  , framework = { browserSize = { width = 100, height = 100 } }
+                  }
+                , Task.perform BrowserGotViewportEvent Browser.Dom.getViewport
+                )
         , view = view
         , update = \event state -> ( update event state, Cmd.none )
         , subscriptions = subscriptions
