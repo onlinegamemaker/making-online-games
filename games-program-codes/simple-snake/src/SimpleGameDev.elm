@@ -21,6 +21,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Html
+import Html.Events
 import Json.Decode
 import Keyboard.Event
 import Playground
@@ -56,7 +57,7 @@ type alias GameComposition state eventFromView =
 
 -}
 type alias GameProgram state eventFromView =
-    Program () (GameStateIncludingFramework state) (GameEventStructure eventFromView)
+    Program () (GameStateIncludingFramework state) (GameEventStructure state eventFromView)
 
 
 type alias GameStateIncludingFramework state =
@@ -73,11 +74,11 @@ type alias FrameworkState =
 type GameView state event
     = HtmlViewWithoutInputs (state -> Html.Html event)
     | HtmlViewWithInputs (state -> Html.Html event) (event -> state -> state)
-    | PictureView (state -> PictureViewResult)
+    | PictureView (state -> PictureViewResult state)
 
 
-type alias PictureViewResult =
-    { shapes : List Playground.Shape
+type alias PictureViewResult state =
+    { shapes : List (Playground.Shape state)
     , viewport : { width : Float, height : Float }
     , backgroundColor : Playground.Color
     }
@@ -87,13 +88,14 @@ type UpdateBasedOnTime state
     = FixedInterval { intervalInMilliseconds : Int, update : state -> state }
 
 
-type GameEventStructure eventFromView
+type GameEventStructure state eventFromView
     = TimeArrivedEvent Time.Posix
     | KeyDownEvent KeyboardEventStructure
     | KeyUpEvent KeyboardEventStructure
     | FromHtmlEvent eventFromView
     | BrowserResizedEvent Int Int
     | BrowserGotViewportEvent Browser.Dom.Viewport
+    | InputClickUpdateState (state -> state)
 
 
 {-| This type describes the keyboard events as used in the functions `updateOnKeyDown` and `updateOnKeyUp`.
@@ -120,7 +122,7 @@ htmlViewWithInputs { renderToHtml, updateForInput } =
     HtmlViewWithInputs renderToHtml updateForInput
 
 
-pictureView : (state -> PictureViewResult) -> GameView state event
+pictureView : (state -> PictureViewResult state) -> GameView state event
 pictureView =
     PictureView
 
@@ -152,9 +154,7 @@ Following is an example:
             }
 
 -}
-game :
-    GameComposition state eventFromHtml
-    -> GameProgram state eventFromHtml
+game : GameComposition state eventFromHtml -> GameProgram state eventFromHtml
 game gameConfig =
     let
         ( view, updateForEventFromHtml ) =
@@ -176,6 +176,7 @@ game gameConfig =
                                     :: shapes
                         in
                         Playground.render
+                            { attributeForShapeInteractivity = Just attributeForShapeInteractivity }
                             (Playground.toScreen viewport.width viewport.height)
                             shapesIncludingBackground
                     , Nothing
@@ -189,7 +190,7 @@ game gameConfig =
             GameStateIncludingFramework (updateGameSpecificState specific) framework
 
         update :
-            GameEventStructure eventFromHtml
+            GameEventStructure state eventFromHtml
             -> GameStateIncludingFramework state
             -> GameStateIncludingFramework state
         update event stateBefore =
@@ -246,6 +247,11 @@ game gameConfig =
                             }
                     }
 
+                InputClickUpdateState updateSpecific ->
+                    wrapUpdateGameSpecificState
+                        updateSpecific
+                        stateBefore
+
         subscriptions _ =
             let
                 updateBasedOnTimeSub =
@@ -275,6 +281,13 @@ game gameConfig =
         , update = \event state -> ( update event state, Cmd.none )
         , subscriptions = subscriptions
         }
+
+
+attributeForShapeInteractivity : Playground.ShapeInteractivity state -> Html.Attribute (GameEventStructure state e)
+attributeForShapeInteractivity interactivity =
+    case interactivity of
+        Playground.ReactOnClick updateOnClick ->
+            Html.Events.onClick (InputClickUpdateState updateOnClick)
 
 
 {-| Generate the HTML code for an SVG rectangle. Note the rectangle will only be visible when placed in an SVG element.

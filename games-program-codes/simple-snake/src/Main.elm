@@ -169,7 +169,7 @@ moveSnakeForwardOneStep gameStateBefore =
     }
 
 
-renderToPicture : GameState -> SimpleGameDev.PictureViewResult
+renderToPicture : GameState -> SimpleGameDev.PictureViewResult GameState
 renderToPicture gameState =
     let
         cellSideLength =
