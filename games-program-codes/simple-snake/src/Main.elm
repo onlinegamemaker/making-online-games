@@ -36,7 +36,7 @@ type alias Snake =
     }
 
 
-main : SimpleGameDev.GameProgram GameState ()
+main : SimpleGameDev.GameProgram GameState
 main =
     SimpleGameDev.game
         { initialState = initialState
