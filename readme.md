@@ -17,12 +17,12 @@ A simple implementation of the classic snake game. You can control the snake usi
 
 ### Sunny Land — A WebGL Playground platformer
 
-<a href="https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2FViir%2Fsunny-land%2Ftree%2Fb3350b2e0aa2e2d72aba155cc959d672d7e5f3ca%2F&file-path-to-open=src%2FMain.elm">
+<a href="https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2FViir%2Fsunny-land%2Ftree%2Fd7660f6e6edf099d8d52587224582f235e0f6a4e%2F&file-path-to-open=src%2FMain.elm">
 <img src="./guide/image/sunny-land-game.png" alt="Sunny Land Game Screenshot" width="200" />
 </a>
 
 + Main repository by [Andrea Peltrin](https://github.com/passiomatic): https://github.com/passiomatic/sunny-land
-+ Online editor: https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2FViir%2Fsunny-land%2Ftree%2Fb3350b2e0aa2e2d72aba155cc959d672d7e5f3ca%2F&file-path-to-open=src%2FMain.elm
++ Online editor: https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2FViir%2Fsunny-land%2Ftree%2Fd7660f6e6edf099d8d52587224582f235e0f6a4e%2F&file-path-to-open=src%2FMain.elm
 
 ## Tech Demos
 
