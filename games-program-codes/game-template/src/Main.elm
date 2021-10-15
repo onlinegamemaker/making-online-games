@@ -13,7 +13,7 @@ import SimpleGameDev
 
 
 type alias GameState =
-    {}
+    { toggled : Bool }
 
 
 main : SimpleGameDev.GameProgram GameState
@@ -29,7 +29,7 @@ main =
 
 initialState : GameState
 initialState =
-    {}
+    { toggled = False }
 
 
 renderToPicture : GameState -> SimpleGameDev.PictureViewResult GameState
@@ -40,12 +40,23 @@ renderToPicture gameState =
             , Playground.circle Playground.white 40
             , Playground.circle Playground.black 10
                 |> Playground.move -14 11
-            , Playground.rectangle Playground.darkOrange 40 40
+            , (if gameState.toggled then
+                Playground.rectangle Playground.lightBlue 60 60
+
+               else
+                Playground.rectangle Playground.darkOrange 40 40
+              )
                 |> Playground.moveUp 110
                 |> Playground.moveLeft 140
                 |> Playground.rotate 45
+                |> Playground.reactOnClick shapeClicked
             ]
         ]
     , viewport = { width = 400, height = 400 }
     , backgroundColor = Playground.darkCharcoal
     }
+
+
+shapeClicked : GameState -> GameState
+shapeClicked gameStateBeforeClicked =
+    { gameStateBeforeClicked | toggled = not gameStateBeforeClicked.toggled }
