@@ -52,3 +52,9 @@ This demo uses WebGL functions to render a rotating cube.
 
 + Program code: [./implement/demo/webgl-rotating-cube](./implement/demo/webgl-rotating-cube)
 + Online editor: https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Ffd35d23d89a50014097e64d362f1a991a8af206f%2Fimplement%2Fdemo%2Fwebgl-rotating-cube&file-path-to-open=src%2FMain.elm
+
+### elm-3d-playground-exploration
+
++ Program code: https://github.com/erkal/elm-3d-playground-exploration/tree/022ae72a427ecbf8c9b7bb0e4c608c5d195c2546
++ Online editor: https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Ferkal%2Felm-3d-playground-exploration%2Ftree%2F022ae72a427ecbf8c9b7bb0e4c608c5d195c2546%2F
+
