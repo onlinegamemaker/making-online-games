@@ -22,6 +22,8 @@ import Browser.Dom
 import Browser.Events
 import Html
 import Html.Events
+import Html.Events.Extra.Mouse
+import Html.Events.Extra.Touch
 import Json.Decode
 import Keyboard.Event
 import Playground
@@ -102,7 +104,7 @@ type GameEventStructure state
     | FromHtmlEvent (state -> state)
     | BrowserResizedEvent Int Int
     | BrowserGotViewportEvent Browser.Dom.Viewport
-    | InputClickUpdateState (state -> state)
+    | InputMouseDownOrTouchStartEvent (state -> state)
 
 
 {-| This type describes the keyboard events as used in the functions `updateOnKeyDown` and `updateOnKeyUp`.
@@ -171,7 +173,7 @@ game gameConfig =
                                     :: shapes
                         in
                         Playground.render
-                            { attributeForShapeInteractivity = Just attributeForShapeInteractivity }
+                            { attributesForShapeInteractivity = Just attributesForShapeInteractivity }
                             (Playground.toScreen viewport.width viewport.height)
                             shapesIncludingBackground
 
@@ -238,7 +240,7 @@ game gameConfig =
                             }
                     }
 
-                InputClickUpdateState updateSpecific ->
+                InputMouseDownOrTouchStartEvent updateSpecific ->
                     wrapUpdateGameSpecificState
                         updateSpecific
                         stateBefore
@@ -274,11 +276,13 @@ game gameConfig =
         }
 
 
-attributeForShapeInteractivity : Playground.ShapeInteractivity state -> Html.Attribute (GameEventStructure state)
-attributeForShapeInteractivity interactivity =
+attributesForShapeInteractivity : Playground.ShapeInteractivity state -> List (Html.Attribute (GameEventStructure state))
+attributesForShapeInteractivity interactivity =
     case interactivity of
-        Playground.ReactOnClick updateOnClick ->
-            Html.Events.onClick (InputClickUpdateState updateOnClick)
+        Playground.OnMouseDownOrTouchStartEvent updateOnClick ->
+            [ Html.Events.Extra.Mouse.onDown (always (InputMouseDownOrTouchStartEvent updateOnClick))
+            , Html.Events.Extra.Touch.onStart (always (InputMouseDownOrTouchStartEvent updateOnClick))
+            ]
 
 
 {-| Generate the HTML code for an SVG rectangle. Note the rectangle will only be visible when placed in an SVG element.

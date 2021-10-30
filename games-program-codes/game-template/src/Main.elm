@@ -49,7 +49,7 @@ renderToPicture gameState =
                 |> Playground.moveUp 110
                 |> Playground.moveLeft 140
                 |> Playground.rotate 45
-                |> Playground.reactOnClick shapeClicked
+                |> Playground.onMouseDownOrTouchStart shapeTouched
             ]
         ]
     , viewport = { width = 400, height = 400 }
@@ -57,6 +57,6 @@ renderToPicture gameState =
     }
 
 
-shapeClicked : GameState -> GameState
-shapeClicked gameStateBeforeClicked =
+shapeTouched : GameState -> GameState
+shapeTouched gameStateBeforeClicked =
     { gameStateBeforeClicked | toggled = not gameStateBeforeClicked.toggled }

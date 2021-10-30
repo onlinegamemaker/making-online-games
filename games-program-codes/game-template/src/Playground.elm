@@ -14,7 +14,7 @@ module Playground exposing
     , white, lightGrey, grey, darkGrey, lightCharcoal, charcoal, darkCharcoal, black
     , lightGray, gray, darkGray
     , Number
-    , ShapeInteractivity(..), reactOnClick, render, toScreen
+    , ShapeInteractivity(..), onMouseDownOrTouchStart, render, toScreen
     )
 
 {-|
@@ -110,13 +110,13 @@ import Time
 
 
 type alias RenderConfig state event =
-    { attributeForShapeInteractivity : Maybe (ShapeInteractivity state -> Svg.Attribute event)
+    { attributesForShapeInteractivity : Maybe (ShapeInteractivity state -> List (Svg.Attribute event))
     }
 
 
 renderConfigWithoutInteractivity : RenderConfig state event
 renderConfigWithoutInteractivity =
-    { attributeForShapeInteractivity = Nothing
+    { attributesForShapeInteractivity = Nothing
     }
 
 
@@ -895,7 +895,7 @@ type Form state
 
 
 type ShapeInteractivity state
-    = ReactOnClick (state -> state)
+    = OnMouseDownOrTouchStartEvent (state -> state)
 
 
 {-| Make circles:
@@ -1633,17 +1633,17 @@ renderShape config (Shape x y angle s alpha form interactivity) =
                     g (transform (renderTransform x y angle s) :: renderAlpha alpha)
                         (List.map (renderShape config) shapes)
     in
-    case config.attributeForShapeInteractivity of
+    case config.attributesForShapeInteractivity of
         Nothing ->
             shapeWithoutInteractivity
 
-        Just attributeForShapeInteractivity ->
+        Just attributesForShapeInteractivity ->
             if interactivity == [] then
                 shapeWithoutInteractivity
 
             else
                 [ shapeWithoutInteractivity ]
-                    |> g (interactivity |> List.map attributeForShapeInteractivity)
+                    |> g (interactivity |> List.concatMap attributesForShapeInteractivity)
 
 
 renderCircle : Color -> Number -> Number -> Number -> Number -> Number -> Number -> Svg event
@@ -1797,6 +1797,13 @@ renderTransform x y a s =
         "translate(" ++ String.fromFloat x ++ "," ++ String.fromFloat -y ++ ") rotate(" ++ String.fromFloat -a ++ ") scale(" ++ String.fromFloat s ++ ")"
 
 
-reactOnClick : (state -> state) -> Shape state -> Shape state
-reactOnClick updateState (Shape x y a s o f interactivity) =
-    Shape x y a s o f (ReactOnClick updateState :: interactivity)
+{-| Update game state triggered on a "mousedown" or "touchstart" event.
+To learn more about these types of events, see:
+
+  - <https://developer.mozilla.org/docs/Web/API/Element/mousedown_event>
+  - <https://developer.mozilla.org/docs/Web/API/Element/touchstart_event>
+
+-}
+onMouseDownOrTouchStart : (state -> state) -> Shape state -> Shape state
+onMouseDownOrTouchStart updateState (Shape x y a s o f interactivity) =
+    Shape x y a s o f (OnMouseDownOrTouchStartEvent updateState :: interactivity)
