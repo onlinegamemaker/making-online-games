@@ -1,5 +1,10 @@
 module Main exposing (main)
 
+{- A simple implementation of the classic snake game. You can control the snake using arrow keys and WASD keys.
+
+   For more game programs, see https://github.com/onlinegamemaker/making-online-games
+-}
+
 import Keyboard.Key
 import Playground
 import SimpleGameDev exposing (listDictGet, listRemoveSet)
