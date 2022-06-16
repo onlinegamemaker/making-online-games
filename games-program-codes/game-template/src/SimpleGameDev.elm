@@ -1,6 +1,6 @@
 module SimpleGameDev exposing (..)
 
-{-| This module provides a framework to build video games as well as a library of standard helper functions.
+{-| This module contains a framework and a library of standard helper functions for building video games.
 The framework wraps the more general Elm program type with an interface optimized for video games.
 
 
@@ -21,7 +21,6 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Html
-import Html.Events
 import Html.Events.Extra.Mouse
 import Html.Events.Extra.Touch
 import Json.Decode
@@ -40,7 +39,7 @@ import Time
 -}
 
 
-{-| Composes a game program of functions to handle different events like pressing or releasing a key.
+{-| Describes a complete game program, connecting your project's functions for init, event handlers, and view.
 -}
 type alias GameComposition state =
     { initialState : state
@@ -59,7 +58,7 @@ type alias GameComposition state =
 -}
 
 
-{-| This type helps you write a type annotation for the function describing the composition of your game:
+{-| This type helps you write a type annotation for the declaration describing the composition of your game:
 
     main : GameProgram GameState
     main =
@@ -134,7 +133,7 @@ updateWithFixedInterval =
     FixedInterval
 
 
-{-| Use this function to compose a complete game, connecting the specific functions in your project.
+{-| Composes a complete game program, connecting your project's functions for init, event handlers, and view.
 Following is an example:
 
     main : SimpleGameDev.GameProgram GameState
