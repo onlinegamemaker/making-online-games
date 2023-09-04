@@ -58,3 +58,11 @@ This demo uses WebGL functions to render a rotating cube.
 + Program code: https://github.com/erkal/elm-3d-playground-exploration/tree/022ae72a427ecbf8c9b7bb0e4c608c5d195c2546
 + Online editor: https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Ferkal%2Felm-3d-playground-exploration%2Ftree%2F022ae72a427ecbf8c9b7bb0e4c608c5d195c2546%2F
 
+## Basic Elm
+
+The following examples are not games, but they can be useful to learn the basics of Elm.
+
+### Counter Buttons
+
++ Program code: <https://github.com/onlinegamemaker/making-online-games/tree/ce102470b4544c4c0dda6daef2fc2660b3e20b06/implement/demo/counter-buttons>
++ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fce102470b4544c4c0dda6daef2fc2660b3e20b06%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm>
