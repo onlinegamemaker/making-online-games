@@ -1,7 +1,7 @@
 module CounterButtonsMain exposing (..)
 
 {-
-   This ia a simple app showing two buttons to increment and decrement an integer in the app state.
+   This app shows two buttons to increment and decrement an integer in the app state.
 
    For more examples, including complete games, see <https://github.com/onlinegamemaker/making-online-games>
 -}
