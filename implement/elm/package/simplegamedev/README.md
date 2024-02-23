@@ -1,4 +1,4 @@
-This package supports the simple development of video games in [Ellie](https://github.com/ellie-app/ellie/issues/94#issuecomment-487252060). 
+This package supports the simple development of video games in Elm.
 
 The functions contained in this package make it easier to create a browser app and provide implementations for commonly used generic functionality.
 
