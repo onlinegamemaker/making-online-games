@@ -2,7 +2,8 @@
 
 ## Games
 
-Following is a list of open-source games. The main criterion for inclusion in this list is a simple setup for development. Each game entry links to an online editor to make and test changes to the program code.
+Following is a list of video game programs.
+Each game entry links to an online editor to make and test changes to the program code.
 
 ### Simple Snake
 
@@ -60,9 +61,14 @@ This demo uses WebGL functions to render a rotating cube.
 
 ## Basic Elm
 
-The following examples are not games, but they can be useful to learn the basics of Elm.
+The following examples are not games, but useful to learn the basics of Elm.
 
 ### Counter Buttons
 
-+ Program code: <https://github.com/onlinegamemaker/making-online-games/tree/ce102470b4544c4c0dda6daef2fc2660b3e20b06/implement/demo/counter-buttons>
-+ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fce102470b4544c4c0dda6daef2fc2660b3e20b06%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm>
++ Program code: <https://github.com/onlinegamemaker/making-online-games/tree/b1c8a121e1df6e7e66a42f70de3de8be683f3501/implement/demo/counter-buttons>
++ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fb1c8a121e1df6e7e66a42f70de3de8be683f3501%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm>
+
+### Analog Clock
+
++ Program code: <https://github.com/onlinegamemaker/making-online-games/tree/b1c8a121e1df6e7e66a42f70de3de8be683f3501/implement/demo/clock-svg>
++ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fb1c8a121e1df6e7e66a42f70de3de8be683f3501%2Fimplement%2Fdemo%2Fclock-svg&file-path-to-open=src%2FMain.elm>
