@@ -72,6 +72,8 @@ view state =
         , Html.Attributes.style "height" "100vh"
         , Html.Attributes.style "overflow" "hidden"
         , Html.Attributes.style "background-color" "#333"
+        , Html.Attributes.style "display" "grid"
+        , Html.Attributes.style "place-content" "center"
         ]
         [ viewClockSvg state ]
 

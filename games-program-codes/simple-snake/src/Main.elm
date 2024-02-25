@@ -192,7 +192,10 @@ renderToPicture gameState =
                 |> Playground.moveDown ((toFloat cellLocation.y + 0.5) * cellSideLength - worldHeight / 2)
 
         worldShape =
-            Playground.rectangle Playground.black worldWidth worldHeight
+            Playground.rectangle
+                (Playground.rgb 33 33 33)
+                worldWidth
+                worldHeight
 
         snakeShape =
             gameState.snake.headLocation

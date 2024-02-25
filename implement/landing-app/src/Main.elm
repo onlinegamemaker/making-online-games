@@ -19,10 +19,10 @@ type alias ExampleEntry =
 exampleEntries : List ExampleEntry
 exampleEntries =
     [ { name = "Counter Buttons"
-      , url = "https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fb1c8a121e1df6e7e66a42f70de3de8be683f3501%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm"
+      , url = "https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fmain%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm"
       }
     , { name = "Analog Clock"
-      , url = "https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fb1c8a121e1df6e7e66a42f70de3de8be683f3501%2Fimplement%2Fdemo%2Fclock-svg&file-path-to-open=src%2FMain.elm"
+      , url = "https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fmain%2Fimplement%2Fdemo%2Fclock-svg&file-path-to-open=src%2FMain.elm"
       }
     , { name = "Snake Game"
       , url = "https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fmain%2Fgames-program-codes%2Fsimple-snake&file-path-to-open=src%2FMain.elm"

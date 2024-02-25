@@ -66,9 +66,9 @@ The following examples are not games, but useful to learn the basics of Elm.
 ### Counter Buttons
 
 + Program code: <https://github.com/onlinegamemaker/making-online-games/tree/b1c8a121e1df6e7e66a42f70de3de8be683f3501/implement/demo/counter-buttons>
-+ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fb1c8a121e1df6e7e66a42f70de3de8be683f3501%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm>
++ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fmain%2Fimplement%2Fdemo%2Fcounter-buttons&file-path-to-open=src%2FCounterButtonsMain.elm>
 
 ### Analog Clock
 
 + Program code: <https://github.com/onlinegamemaker/making-online-games/tree/b1c8a121e1df6e7e66a42f70de3de8be683f3501/implement/demo/clock-svg>
-+ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fb1c8a121e1df6e7e66a42f70de3de8be683f3501%2Fimplement%2Fdemo%2Fclock-svg&file-path-to-open=src%2FMain.elm>
++ Online editor: <https://elm-editor.com/?project-state=https%3A%2F%2Fgithub.com%2Fonlinegamemaker%2Fmaking-online-games%2Ftree%2Fmain%2Fimplement%2Fdemo%2Fclock-svg&file-path-to-open=src%2FMain.elm>
